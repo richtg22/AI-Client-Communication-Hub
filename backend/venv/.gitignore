@@ -1,0 +1,19 @@
+# Virtual Environment
+backend/venv/
+
+# Environment Variables
+backend/.env
+
+# Local Database
+backend/clienthub.db
+
+# Python
+__pycache__/
+*.pyc
+
+# Frontend
+node_modules/
+dist/
+
+# VS Code
+.vscode/
