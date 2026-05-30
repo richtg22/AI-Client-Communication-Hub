@@ -3,8 +3,10 @@ from sqlalchemy.orm import Session
 
 from app.database import Base, engine, get_db
 from app.models import User
-from app.schemas import UserCreate, UserResponse, UserLogin, TokenResponse
-from app.auth import hash_password, verify_password, create_access_token
+from app.schemas import UserCreate, UserResponse, UserLogin, TokenResponse, SummaryCreate
+from app.auth import hash_password, verify_password, create_access_token, get_current_user
+from app.ai_service import generate_summary
+
 
 Base.metadata.create_all(bind=engine)
 
@@ -66,3 +68,19 @@ def get_users(db: Session = Depends(get_db)):
         }
         for user in users
     ]
+
+@app.get("/me")
+def get_me(current_user: dict = Depends(get_current_user)):
+    return current_user
+
+@app.post("/generate-summary")
+def create_summary(
+    request: SummaryCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    result = generate_summary(request.raw_update)
+
+    return {
+        "user": current_user["email"],
+        "generated_content": result
+    }
