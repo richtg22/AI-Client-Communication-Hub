@@ -14,7 +14,7 @@ app = FastAPI(title="AI Client Communication Hub")
 
 origins = [
     "http://localhost:5173",
-    "https://ai-client-communication-hub.vercel.app/",
+    "https://ai-client-communication-hub.vercel.app",
 ]
 
 app.add_middleware(

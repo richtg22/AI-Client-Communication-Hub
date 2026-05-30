@@ -1,7 +1,7 @@
 import { useState } from "react";
 import api from "../services/api";
 
-function Login({ onLogin }) {
+function Login({ onLogin, onShowRegister }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -55,6 +55,14 @@ function Login({ onLogin }) {
       >
         Login
       </button>
+
+      <button
+        onClick={onShowRegister}
+        className="w-full mt-4 text-slate-300 hover:text-white"
+        >
+            New user? Create an account 
+        </button>
+
     </div>
   </div>
 );

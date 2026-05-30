@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 
@@ -7,16 +8,26 @@ function App() {
     !!localStorage.getItem("token")
   );
 
+  const [showRegister, setShowRegister] = useState(false);
+
+  if (loggedIn) {
+    return <Dashboard />;
+  }
+
+  if (showRegister) {
+    return (
+      <Register
+        onRegisterSuccess={() => setShowRegister(false)}
+        onBackToLogin={() => setShowRegister(false)}
+      />
+    );
+  }
+
   return (
-    <>
-      {loggedIn ? (
-        <Dashboard />
-      ) : (
-        <Login
-          onLogin={() => setLoggedIn(true)}
-        />
-      )}
-    </>
+    <Login
+      onLogin={() => setLoggedIn(true)}
+      onShowRegister={() => setShowRegister(true)}
+    />
   );
 }
 
