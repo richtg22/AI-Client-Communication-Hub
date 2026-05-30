@@ -6,12 +6,18 @@ from app.models import User, Summary
 from app.schemas import UserCreate, UserResponse, UserLogin, TokenResponse, SummaryCreate, SummaryResponse
 from app.auth import hash_password, verify_password, create_access_token, get_current_user
 from app.ai_service import generate_summary
-
+from fastapi.middleware.cors import CORSMiddleware
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="AI Client Communication Hub")
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def root():
