@@ -1,5 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy import func
 from sqlalchemy.orm import Session
+from app.models import User, Summary
 
 from app.database import Base, engine, get_db
 from app.models import User, Summary
@@ -135,6 +137,28 @@ def get_summary(
         )
 
     return summary
+
+@app.get("/analytics")
+def get_analytics(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    total_users = db.query(User).count()
+
+    total_summaries = db.query(Summary).count()
+
+    my_summaries = (
+        db.query(Summary)
+        .filter(Summary.user_id == current_user.id)
+        .count()
+    )
+
+    return {
+        "total_users": total_users,
+        "total_summaries": total_summaries,
+        "my_summaries": my_summaries,
+        "current_user": current_user.full_name
+    }
 
 @app.delete("/summaries/{summary_id}")
 def delete_summary(

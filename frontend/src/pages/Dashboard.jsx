@@ -10,7 +10,7 @@ function Dashboard() {
   const [summaries, setSummaries] = useState([]);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-
+  const [analytics, setAnalytics] = useState(null);
   const token = localStorage.getItem("token");
 
   const fetchSummaries = async () => {
@@ -23,7 +23,15 @@ function Dashboard() {
     } catch (error) {
       console.error(error);
     }
-  };
+
+    const analyticsResponse = await api.get("/analytics", {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    
+    setAnalytics(analyticsResponse.data);
+};
 
   useEffect(() => {
     fetchSummaries();
@@ -91,6 +99,47 @@ function Dashboard() {
             <h1 className="text-4xl font-bold">
               AI Client Communication Hub
             </h1>
+            {analytics && (
+  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+    
+    <div className="bg-slate-800 p-5 rounded-xl border border-slate-700">
+      <p className="text-slate-400 text-sm">
+        Total Users
+      </p>
+      <h3 className="text-3xl font-bold text-white mt-2">
+        {analytics.total_users}
+      </h3>
+    </div>
+
+    <div className="bg-slate-800 p-5 rounded-xl border border-slate-700">
+      <p className="text-slate-400 text-sm">
+        Total Summaries
+      </p>
+      <h3 className="text-3xl font-bold text-white mt-2">
+        {analytics.total_summaries}
+      </h3>
+    </div>
+
+    <div className="bg-slate-800 p-5 rounded-xl border border-slate-700">
+      <p className="text-slate-400 text-sm">
+        My Summaries
+      </p>
+      <h3 className="text-3xl font-bold text-white mt-2">
+        {analytics.my_summaries}
+      </h3>
+    </div>
+
+    <div className="bg-slate-800 p-5 rounded-xl border border-slate-700">
+      <p className="text-slate-400 text-sm">
+        Logged In User
+      </p>
+      <h3 className="text-lg font-semibold text-green-400 mt-2">
+        {analytics.current_user}
+      </h3>
+    </div>
+
+  </div>
+)}
             <p className="text-slate-400 mt-2">
               Generate client-ready summaries from technical project updates.
             </p>
