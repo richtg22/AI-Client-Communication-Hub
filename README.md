@@ -1,39 +1,33 @@
 # AI Client Communication Hub
 
-A full-stack GenAI application that transforms technical project updates into client-ready communication.
+A full-stack Generative AI application that transforms technical project updates into clear, client-ready communication.
 
-## Problem
+## Overview
 
-Software teams often spend significant time converting technical sprint updates into stakeholder-friendly summaries.
+Software delivery teams often spend significant time converting sprint updates, technical notes, and project progress into stakeholder-friendly reports.
 
-## Solution
+This platform automates that process using Generative AI.
 
-This platform uses Generative AI to convert project updates into:
+## Current Features
 
-- Client-ready summaries
-- Risks and blockers
-- Next-step recommendations
-- Professional email drafts
-
-## Features
-
-### Completed
 - User Registration
 - User Login
 - JWT Authentication
+- RESTful APIs
+- SQLite Database Integration
 
-### In Progress
-- Protected Routes
-- AI Summary Generation
-- Summary History
+## Upcoming Features
 
-### Planned
-- React Dashboard
+- AI-Powered Project Summaries
+- Risk & Blocker Identification
+- Next-Step Recommendations
+- Professional Email Draft Generation
+- Summary History Dashboard
 - Docker Support
-- PostgreSQL
-- Deployment on Render & Vercel
+- PostgreSQL Integration
+- Cloud Deployment
 
-## Tech Stack
+## Technology Stack
 
 ### Backend
 - FastAPI
@@ -45,8 +39,16 @@ This platform uses Generative AI to convert project updates into:
 - OpenAI API
 
 ### Frontend
-- React
+- React (In Progress)
+
+## Project Goal
+
+To demonstrate production-oriented backend engineering and practical Generative AI integration through a real-world consulting workflow application.
 
 ## Author
 
 Tridisha Gogoi
+
+MSc Computing Science | University of Glasgow
+
+Software Engineer | Java | Python | FastAPI | Spring Boot | GenAI
