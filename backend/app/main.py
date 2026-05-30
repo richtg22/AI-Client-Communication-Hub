@@ -2,8 +2,8 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import Base, engine, get_db
-from app.models import User
-from app.schemas import UserCreate, UserResponse, UserLogin, TokenResponse, SummaryCreate
+from app.models import User, Summary
+from app.schemas import UserCreate, UserResponse, UserLogin, TokenResponse, SummaryCreate, SummaryResponse
 from app.auth import hash_password, verify_password, create_access_token, get_current_user
 from app.ai_service import generate_summary
 
@@ -73,14 +73,77 @@ def get_users(db: Session = Depends(get_db)):
 def get_me(current_user: dict = Depends(get_current_user)):
     return current_user
 
-@app.post("/generate-summary")
+@app.post("/generate-summary", response_model=SummaryResponse)
 def create_summary(
     request: SummaryCreate,
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
     result = generate_summary(request.raw_update)
 
+    new_summary = Summary(
+        raw_update=request.raw_update,
+        summary=result["summary"],
+        risks=result["risks"],
+        next_steps=result["next_steps"],
+        email_draft=result["email_draft"],
+        user_id=current_user["user_id"]
+    )
+
+    db.add(new_summary)
+    db.commit()
+    db.refresh(new_summary)
+
+    return new_summary
+
+@app.get("/summaries", response_model=list[SummaryResponse])
+def get_summaries(
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    return db.query(Summary).filter(
+        Summary.user_id == current_user["user_id"]
+    ).order_by(Summary.created_at.desc()).all()
+
+@app.get("/summaries/{summary_id}", response_model=SummaryResponse)
+def get_summary(
+    summary_id: int,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    summary = db.query(Summary).filter(
+        Summary.id == summary_id,
+        Summary.user_id == current_user["user_id"]
+    ).first()
+
+    if not summary:
+        raise HTTPException(
+            status_code=404,
+            detail="Summary not found"
+        )
+
+    return summary
+
+@app.delete("/summaries/{summary_id}")
+def delete_summary(
+    summary_id: int,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    summary = db.query(Summary).filter(
+        Summary.id == summary_id,
+        Summary.user_id == current_user["user_id"]
+    ).first()
+
+    if not summary:
+        raise HTTPException(
+            status_code=404,
+            detail="Summary not found"
+        )
+
+    db.delete(summary)
+    db.commit()
+
     return {
-        "user": current_user["email"],
-        "generated_content": result
+        "message": "Summary deleted successfully"
     }

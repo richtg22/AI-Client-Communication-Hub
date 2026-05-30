@@ -11,20 +11,24 @@ def generate_summary(raw_update: str):
     prompt = f"""
 You are an AI assistant for software delivery teams.
 
-Convert this technical project update into:
-1. Client-friendly summary
-2. Risks/blockers
-3. Next steps
-4. Professional client email draft
+Convert this technical project update into structured client-ready communication.
 
 Technical update:
 {raw_update}
 
-Return using these headings:
+Return the answer exactly in this format:
+
 SUMMARY:
+<client friendly summary>
+
 RISKS:
+<risks and blockers>
+
 NEXT_STEPS:
+<recommended next steps>
+
 EMAIL:
+<professional client email draft>
 """
 
     response = client.chat.completions.create(
@@ -35,4 +39,18 @@ EMAIL:
         temperature=0.3
     )
 
-    return response.choices[0].message.content
+    content = response.choices[0].message.content
+
+    return {
+        "summary": extract_section(content, "SUMMARY:", "RISKS:"),
+        "risks": extract_section(content, "RISKS:", "NEXT_STEPS:"),
+        "next_steps": extract_section(content, "NEXT_STEPS:", "EMAIL:"),
+        "email_draft": content.split("EMAIL:")[-1].strip()
+    }
+
+
+def extract_section(text: str, start: str, end: str):
+    try:
+        return text.split(start)[1].split(end)[0].strip()
+    except IndexError:
+        return ""

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-
+from datetime import datetime
 
 class UserCreate(BaseModel):
     full_name: str
@@ -26,3 +26,15 @@ class TokenResponse(BaseModel):
 
 class SummaryCreate(BaseModel):
     raw_update: str
+
+class SummaryResponse(BaseModel):
+    id: int
+    raw_update: str
+    summary: str
+    risks: str
+    next_steps: str
+    email_draft: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
