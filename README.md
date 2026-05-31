@@ -8,7 +8,7 @@ An AI-powered full-stack web application that transforms technical project updat
 
 **Frontend:** https://ai-client-communication-hub.vercel.app
 
-**Backend API:** [Render Backend URL]
+**Backend API:** https://ai-client-communication-hub-backend.onrender.com
 
 ---
 
