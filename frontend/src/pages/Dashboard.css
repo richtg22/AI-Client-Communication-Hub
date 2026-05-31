@@ -1,0 +1,34 @@
+/* .analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin: 25px 0;
+}
+
+.analytics-card {
+  background: #1f2a44;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.analytics-card h3 {
+  color: #9bb6ff;
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.analytics-card p {
+  font-size: 2rem;
+  font-weight: bold;
+  color: white;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+@media (max-width: 768px) {
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+} */

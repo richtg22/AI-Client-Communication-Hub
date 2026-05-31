@@ -139,7 +139,7 @@ def get_summary(
 
 @app.get("/analytics")
 def get_analytics(
-    current_user: User = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     total_users = db.query(User).count()
@@ -148,7 +148,7 @@ def get_analytics(
 
     my_summaries = (
         db.query(Summary)
-        .filter(Summary.user_id == current_user.id)
+        .filter(Summary.user_id == current_user["user_id"])
         .count()
     )
 
@@ -156,7 +156,7 @@ def get_analytics(
         "total_users": total_users,
         "total_summaries": total_summaries,
         "my_summaries": my_summaries,
-        "current_user": current_user.full_name
+        "current_user": current_user["email"]
     }
 
 @app.delete("/summaries/{summary_id}")

@@ -11,6 +11,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [analytics, setAnalytics] = useState(null);
+
   const token = localStorage.getItem("token");
 
   const fetchSummaries = async () => {
@@ -18,23 +19,26 @@ function Dashboard() {
       const response = await api.get("/summaries", {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       setSummaries(response.data);
     } catch (error) {
       console.error(error);
     }
+  };
 
-    const analyticsResponse = await api.get("/analytics", {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    });
-    
-    setAnalytics(analyticsResponse.data);
-};
+  const fetchAnalytics = async () => {
+    try {
+      const response = await api.get("/analytics", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAnalytics(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
     fetchSummaries();
+    fetchAnalytics();
   }, []);
 
   const generateSummary = async () => {
@@ -56,6 +60,7 @@ function Dashboard() {
       setRawUpdate("");
       setSuccessMessage("Summary generated successfully ✅");
       fetchSummaries();
+      fetchAnalytics();
     } catch (error) {
       console.error(error);
       setSuccessMessage("Something went wrong. Please try again.");
@@ -71,6 +76,7 @@ function Dashboard() {
       });
 
       fetchSummaries();
+      fetchAnalytics();
     } catch (error) {
       console.error(error);
     }
@@ -99,47 +105,6 @@ function Dashboard() {
             <h1 className="text-4xl font-bold">
               AI Client Communication Hub
             </h1>
-            {analytics && (
-  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-    
-    <div className="bg-slate-800 p-5 rounded-xl border border-slate-700">
-      <p className="text-slate-400 text-sm">
-        Total Users
-      </p>
-      <h3 className="text-3xl font-bold text-white mt-2">
-        {analytics.total_users}
-      </h3>
-    </div>
-
-    <div className="bg-slate-800 p-5 rounded-xl border border-slate-700">
-      <p className="text-slate-400 text-sm">
-        Total Summaries
-      </p>
-      <h3 className="text-3xl font-bold text-white mt-2">
-        {analytics.total_summaries}
-      </h3>
-    </div>
-
-    <div className="bg-slate-800 p-5 rounded-xl border border-slate-700">
-      <p className="text-slate-400 text-sm">
-        My Summaries
-      </p>
-      <h3 className="text-3xl font-bold text-white mt-2">
-        {analytics.my_summaries}
-      </h3>
-    </div>
-
-    <div className="bg-slate-800 p-5 rounded-xl border border-slate-700">
-      <p className="text-slate-400 text-sm">
-        Logged In User
-      </p>
-      <h3 className="text-lg font-semibold text-green-400 mt-2">
-        {analytics.current_user}
-      </h3>
-    </div>
-
-  </div>
-)}
             <p className="text-slate-400 mt-2">
               Generate client-ready summaries from technical project updates.
             </p>
@@ -152,6 +117,37 @@ function Dashboard() {
             Logout
           </button>
         </div>
+
+        {analytics && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div className="bg-slate-800 p-5 rounded-xl border border-slate-700">
+              <p className="text-slate-400 text-sm">Total Users</p>
+              <h3 className="text-3xl font-bold text-white mt-2">
+                {analytics.total_users}
+              </h3>
+            </div>
+
+            <div className="bg-slate-800 p-5 rounded-xl border border-slate-700">
+              <p className="text-slate-400 text-sm">Total Summaries</p>
+              <h3 className="text-3xl font-bold text-white mt-2">
+                {analytics.total_summaries}
+              </h3>
+            </div>
+
+            <div className="bg-slate-800 p-5 rounded-xl border border-slate-700">
+              <p className="text-slate-400 text-sm">My Summaries</p>
+              <h3 className="text-3xl font-bold text-white mt-2">
+                {analytics.my_summaries}
+              </h3>
+            </div>
+             <div className="bg-slate-800 p-5 rounded-xl border border-slate-700 min-w-0">
+              <p className="text-slate-400 text-sm">Current User</p>
+              <h3 className="text-3xl font-bold text-white mt-2 break-all">
+                {analytics.current_user}
+              </h3>
+            </div>
+          </div>
+        )}
 
         {successMessage && (
           <div className="mb-6 rounded-lg bg-slate-800 border border-slate-700 p-4 text-green-400">
@@ -176,14 +172,7 @@ function Dashboard() {
             disabled={loading}
             className="bg-blue-600 px-6 py-3 rounded-xl hover:bg-blue-700 disabled:opacity-50"
           >
-            {loading ? (
-              <span className="flex items-center gap-2">
-                <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
-                Generating...
-              </span>
-            ) : (
-              "Generate Summary"
-            )}
+            {loading ? "Generating..." : "Generate Summary"}
           </button>
         </div>
 
