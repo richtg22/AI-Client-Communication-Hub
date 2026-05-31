@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from "../services/api";
+import api, { downloadPdf } from "../services/api";
 
 const cleanText = (text) => {
   return text?.replace(/\*\*/g, "") || "";
@@ -11,19 +11,29 @@ function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [analytics, setAnalytics] = useState(null);
-
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const token = localStorage.getItem("token");
+  const [summaryFilter, setSummaryFilter] = useState("mine");
 
   const fetchSummaries = async () => {
-    try {
-      const response = await api.get("/summaries", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setSummaries(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  try {
+    const response = await api.get("/summaries", {
+      headers: { Authorization: `Bearer ${token}` },
+      params: {
+        search,
+        page,
+        limit: 5,
+      },
+    });
+
+    setSummaries(response.data.items);
+    setTotalPages(response.data.total_pages);
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   const fetchAnalytics = async () => {
     try {
@@ -39,7 +49,7 @@ function Dashboard() {
   useEffect(() => {
     fetchSummaries();
     fetchAnalytics();
-  }, []);
+  }, [page, summaryFilter]);
 
   const generateSummary = async () => {
     if (!rawUpdate.trim()) {
@@ -92,6 +102,37 @@ function Dashboard() {
     }
   };
 
+  const handleDownloadPdf = async (summaryId) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await downloadPdf(
+      summaryId,
+      token
+    );
+
+    const url = window.URL.createObjectURL(
+      new Blob([response.data])
+    );
+
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.setAttribute(
+      "download",
+      `summary_${summaryId}.pdf`
+    );
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    link.remove();
+  } catch (error) {
+    console.error(error);
+  }
+};
+
   const logout = () => {
     localStorage.removeItem("token");
     window.location.reload();
@@ -126,20 +167,26 @@ function Dashboard() {
                 {analytics.total_users}
               </h3>
             </div>
+        <div className="bg-slate-800 p-5 rounded-xl border border-slate-700">
+  <p className="text-slate-400 text-sm">Total Summaries</p>
+  <h3 className="text-3xl font-bold text-white mt-2">
+    {analytics.total_summaries}
+  </h3>
+</div>
 
-            <div className="bg-slate-800 p-5 rounded-xl border border-slate-700">
-              <p className="text-slate-400 text-sm">Total Summaries</p>
-              <h3 className="text-3xl font-bold text-white mt-2">
-                {analytics.total_summaries}
-              </h3>
-            </div>
-
-            <div className="bg-slate-800 p-5 rounded-xl border border-slate-700">
-              <p className="text-slate-400 text-sm">My Summaries</p>
-              <h3 className="text-3xl font-bold text-white mt-2">
-                {analytics.my_summaries}
-              </h3>
-            </div>
+<div
+  onClick={() => {
+    setSearch("");
+    setPage(1);
+    fetchSummaries();
+  }}
+  className="bg-slate-800 p-5 rounded-xl border border-slate-700 cursor-pointer hover:bg-slate-700 transition"
+>
+  <p className="text-slate-400 text-sm">My Summaries</p>
+  <h3 className="text-3xl font-bold text-white mt-2">
+    {analytics.my_summaries}
+  </h3>
+</div>
              <div className="bg-slate-800 p-5 rounded-xl border border-slate-700 min-w-0">
               <p className="text-slate-400 text-sm">Current User</p>
               <h3 className="text-3xl font-bold text-white mt-2 break-all">
@@ -175,6 +222,26 @@ function Dashboard() {
             {loading ? "Generating..." : "Generate Summary"}
           </button>
         </div>
+
+        <div className="mb-6 flex gap-3">
+  <input
+    type="text"
+    placeholder="Search summaries..."
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+    className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white"
+  />
+
+  <button
+    onClick={() => {
+      setPage(1);
+      fetchSummaries();
+    }}
+    className="bg-blue-600 px-5 py-3 rounded-lg hover:bg-blue-700"
+  >
+    Search
+  </button>
+</div>
 
         <div className="mb-6">
           <h2 className="text-2xl font-bold">Generated Summaries</h2>
@@ -223,23 +290,53 @@ function Dashboard() {
               </div>
             </details>
 
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => copyEmailDraft(summary.email_draft)}
-                className="bg-slate-700 px-4 py-2 rounded-lg hover:bg-slate-600"
-              >
-                Copy Email
-              </button>
+            <div className="flex gap-3 mt-4">
+  <button
+    onClick={() => handleCopy(summary.email_draft)}
+    className="bg-slate-600 hover:bg-slate-500 text-white px-4 py-2 rounded-lg transition"
+  >
+    Copy Email
+  </button>
 
-              <button
-                onClick={() => deleteSummary(summary.id)}
-                className="bg-red-600 px-4 py-2 rounded-lg hover:bg-red-700"
-              >
-                Delete
-              </button>
-            </div>
+  <button
+    onClick={() => handleDelete(summary.id)}
+    className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg transition"
+  >
+    Delete
+  </button>
+
+  <button
+    onClick={() => handleDownloadPdf(summary.id)}
+    className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg transition"
+  >
+    Download PDF
+  </button>
+</div>
+
           </div>
+
         ))}
+        <div className="flex justify-between items-center mt-6 mb-10">
+  <button
+    disabled={page === 1}
+    onClick={() => setPage(page - 1)}
+    className="bg-slate-700 px-4 py-2 rounded-lg disabled:opacity-40"
+  >
+    Previous
+  </button>
+
+  <p className="text-slate-400">
+    Page {page} of {totalPages}
+  </p>
+
+  <button
+    disabled={page === totalPages}
+    onClick={() => setPage(page + 1)}
+    className="bg-slate-700 px-4 py-2 rounded-lg disabled:opacity-40"
+  >
+    Next
+  </button>
+</div>
       </div>
     </div>
   );
